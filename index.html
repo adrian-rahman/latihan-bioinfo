@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bioinformatika — Latihan PG + Pembahasan</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+--bg:#f4f2ec;--card:#ffffff;--line:#e7e2d6;
+--ink:#232a33;--mut:#73706a;--acc:#0f766e;--acc-soft:#e6f4f1;
+--ok:#166b4d;--ok-bg:#edf7f1;--ok-line:#bfe3d2;
+--no:#a13232;--no-bg:#faf0f0;--no-line:#eec9c9;
+}
+body{font-family:"Segoe UI",system-ui,-apple-system,Arial,sans-serif;color:var(--ink);background:var(--bg);min-height:100vh;line-height:1.6}
+.bg{position:fixed;inset:0;z-index:-1;background:var(--bg)}
+.wrap{max-width:960px;margin:0 auto;padding:36px 20px 70px}
+.hero{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:28px 30px 24px;box-shadow:0 1px 2px rgba(35,42,51,.05),0 12px 32px rgba(35,42,51,.06)}
+h1{font-size:clamp(23px,3.6vw,31px);margin:0 0 4px;letter-spacing:-.3px;font-weight:700}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.chip{font-size:13px;padding:6px 13px;border-radius:999px;background:var(--card);border:1px solid var(--line);color:var(--ink)}
+.chip b{color:var(--acc)}
+.bar{height:6px;border-radius:99px;margin-top:18px;background:#ece7da;overflow:hidden}
+.bar i{display:block;height:100%;width:0%;border-radius:99px;background:var(--acc);transition:width .3s}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:16px;flex-wrap:wrap}
+.timer{font-variant-numeric:tabular-nums;font-size:22px;font-weight:700;letter-spacing:1px;padding:6px 18px;border-radius:12px;border:1px solid var(--line);background:var(--card)}
+.timer.low{color:var(--no);border-color:var(--no-line)}
+.controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:16px}
+button{cursor:pointer;border:0;font-weight:600;font-family:inherit;font-size:14.5px}
+.btn-primary{padding:12px 26px;border-radius:12px;color:#fff;background:var(--acc)}
+.btn-primary:hover{filter:brightness(1.06)}
+.btn-ghost{padding:10px 18px;border-radius:12px;background:var(--card);color:var(--ink);border:1px solid var(--line)}
+.btn-ghost:hover{border-color:var(--acc);color:var(--acc)}
+.btn-danger{padding:10px 18px;border-radius:12px;background:var(--card);color:var(--no);border:1px solid var(--no-line)}
+.switch{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--mut);cursor:pointer;user-select:none}
+.switch input{width:16px;height:16px;accent-color:var(--acc)}
+.layout{display:grid;grid-template-columns:1fr 240px;gap:18px;margin-top:18px;align-items:start}
+@media(max-width:860px){.layout{grid-template-columns:1fr}}
+.glass{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px;box-shadow:0 1px 2px rgba(35,42,51,.05),0 12px 32px rgba(35,42,51,.06)}
+.glass + .glass{margin-top:18px}
+.qtag{font-size:12px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:var(--acc)}
+.qtext{font-size:18px;margin:8px 0 16px;font-weight:600}
+.opt{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;margin:8px 0;padding:12px 14px;border-radius:12px;color:var(--ink);background:var(--card);border:1px solid var(--line);font-size:15px}
+.opt:hover{border-color:var(--acc)}
+.opt .L{flex:0 0 28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;background:#f1eee6;color:var(--mut)}
+.opt.locked{cursor:default}
+.opt.ok{background:var(--ok-bg);border-color:var(--ok-line)}
+.opt.ok .L{background:var(--ok);color:#fff}
+.opt.bad{background:var(--no-bg);border-color:var(--no-line)}
+.opt.bad .L{background:var(--no);color:#fff}
+.navbox{position:sticky;top:14px}
+.navbox h3{font-size:12px;color:var(--mut);margin-bottom:12px;letter-spacing:1.6px;text-transform:uppercase;font-weight:700}
+.nums{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}
+.n{height:36px;border-radius:9px;background:var(--card);border:1px solid var(--line);color:var(--ink);font-weight:600;font-size:13px}
+.n:hover{border-color:var(--acc)}
+.n.cur{border:2px solid var(--acc);height:36px}
+.n.right{background:var(--ok-bg);border-color:var(--ok-line);color:var(--ok)}
+.n.wrong{background:var(--no-bg);border-color:var(--no-line);color:var(--no)}
+.n.flagged{border-bottom:3px solid #c99a1f}
+.foot{display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:10px;flex-wrap:wrap}
+.count{color:var(--mut);font-size:13.5px}
+.fb{margin-top:14px;padding:12px 16px;border-radius:12px;font-weight:700;font-size:15px}
+.fb.ok{background:var(--ok-bg);border:1px solid var(--ok-line);color:var(--ok)}
+.fb.no{background:var(--no-bg);border:1px solid var(--no-line);color:var(--no)}
+.score-hero{text-align:center}
+.ring{font-size:52px;font-weight:800;letter-spacing:-1px}
+.ring small{font-size:19px;color:var(--mut);font-weight:400}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:20px 0}
+.kpi{border:1px solid var(--line);border-radius:12px;padding:12px;background:#fbfaf7}
+.kpi b{font-size:18px}.kpi span{display:block;font-size:12px;color:var(--mut);margin-top:2px}
+.kpi .pbar{height:5px;border-radius:99px;background:#e8e2d4;margin-top:8px;overflow:hidden}
+.kpi .pbar i{display:block;height:100%;background:var(--acc)}
+.exp{margin-top:12px;font-size:14.5px;background:#fbfaf7;border:1px solid var(--line);border-left:4px solid var(--acc);padding:12px 15px;border-radius:0 12px 12px 0}
+.exp b{color:var(--acc)}
+.verdict{display:inline-block;margin-top:10px;padding:8px 20px;border-radius:999px;font-weight:700;border:1px solid var(--line)}
+.v-pass{color:var(--ok);border-color:var(--ok-line);background:var(--ok-bg)}
+.v-fail{color:var(--no);border-color:var(--no-line);background:var(--no-bg)}
+button:focus-visible,.opt:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+.footer{color:var(--mut);font-size:12.5px;text-align:center;margin-top:26px}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="wrap">
+<section class="hero">
+<h1>Bioinformatika — Latihan PG + Pembahasan</h1>
+<div class="chips">
+<span class="chip"><b id="nq2">…</b>&nbsp;soal</span>
+<span class="chip">60 menit</span>
+<span class="chip">Offline</span>
+<span class="chip">Bahasan instan per soal</span>
+</div>
+<div class="bar"><i id="pbar"></i></div>
+<div class="topbar">
+<span class="timer" id="timer">60:00</span>
+<span class="chip" id="info">belum mulai</span>
+</div>
+<div class="controls">
+<label class="switch"><input type="checkbox" id="shuffle" checked> Acak urutan soal</label>
+<button class="btn-primary" id="bStart">Mulai Kerjakan</button>
+</div>
+</section>
+<div id="app" style="margin-top:18px"></div>
+<p class="footer">File lokal &middot; tidak mengirim data ke mana pun</p>
+</div>
+<script>
+const QS=[
+{t:"DNA/RNA/Protein",q:"DNA tersusun atas unit-unit kecil yang disebut…",o:["Asam amino","Nukleotida","Protein","Kodon","Ribosom"],a:1,e:"Nukleotida = basa + gula + fosfat. Gula DNA adalah deoksiribosa (RNA: ribosa), dan rantai gula-fosfat membentuk backbone. Asam amino itu unit protein, kodon itu triplet basa."},
+{t:"DNA/RNA/Protein",q:"Manakah yang termasuk basa nitrogen pada DNA?",o:["Adenine","Ribose","Phosphate","Amino acid","Peptide"],a:0,e:"Ribose = gula, phosphate = gugus fosfat. Basa nitrogen DNA: A, T, G, C (RNA: A, U, G, C). Pasangannya: A–T, G–C."},
+{t:"DNA/RNA/Protein",q:"Huruf A, T, G, dan C pada urutan DNA menunjukkan…",o:["Jenis asam amino","Jenis gula","Basa nitrogen","Jenis protein","Jenis RNA"],a:2,e:"ATGC adalah alfabet basa nitrogen DNA — inilah yang disimpan di GenBank dan menjadi input BLAST sebagai sekuen FASTA."},
+{t:"DNA/RNA/Protein",q:"Pasangan basa yang benar pada DNA adalah…",o:["A–C dan G–T","A–G dan C–T","A–T dan G–C","A–U dan G–C","A–A dan G–G"],a:2,e:"DNA: A–T (2 ikatan hidrogen), G–C (3 ikatan hidrogen). A–U hanya di RNA. Daerah kaya G–C lebih stabil dan punya Tm lebih tinggi."},
+{t:"DNA/RNA/Protein",q:"Komponen utama sebuah nukleotida DNA adalah…",o:["Basa, gula, dan fosfat","Asam amino, gula, dan fosfat","Protein, basa, dan gula","Basa, protein, dan fosfat","RNA, gula, dan protein"],a:0,e:"Rangka gula-fosfat = backbone, basa menonjol ke dalam untuk berpasangan. Tanpa fosfat tidak ada ikatan fosfodiester antar nukleotida."},
+{t:"DNA/RNA/Protein",q:"Salah satu perbedaan DNA dan RNA adalah…",o:["DNA pakai urasil, RNA pakai timin","DNA pakai timin, RNA pakai urasil","DNA tak punya basa nitrogen","DNA dari asam amino","Keduanya pakai timin"],a:1,e:"DNA: …T…, RNA: …U… (U tanpa gugus metil). DNA double-helix stabil untuk arsip; RNA umumnya single-strand dan reaktif."},
+{t:"Central Dogma",q:"Urutan aliran informasi central dogma yang tepat adalah…",o:["Protein → RNA → DNA","RNA → DNA → Protein","DNA → RNA → Protein","DNA → Protein → RNA","Protein → DNA → RNA"],a:2,e:"DNA (transkripsi) → RNA (translasi) → Protein. Pengecualian: reverse transcriptase (RNA→DNA) pada retrovirus."},
+{t:"Central Dogma",q:"Proses pembentukan RNA dari DNA disebut…",o:["Translasi","Replikasi","Transkripsi","Folding","Splicing"],a:2,e:"Transkripsi oleh RNA polimerase mulai dari promoter. Hasil awal (pre-mRNA) lalu displicing membuang intron sebelum translasi."},
+{t:"Central Dogma",q:"Proses pembentukan protein dari mRNA disebut…",o:["Transkripsi","Translasi","Replikasi","Komplementasi","Dehidrasi"],a:1,e:"Translasi di ribosom: kodon mRNA dipasangkan antikodon tRNA, tRNA membawa asam amino yang dirangkai jadi polipeptida."},
+{t:"Central Dogma",q:"Jenis RNA yang membawa kode tiga basa dari DNA adalah…",o:["mRNA","tRNA","rRNA","DNA","Protein"],a:0,e:"mRNA = messenger pembawa kodon. tRNA = adaptor antikodon, rRNA + protein = mesin ribosom."},
+{t:"Tools",q:"Format standar untuk input sekuen ke BLAST adalah…",o:["GenBank","FASTA","PDB","NEXUS","EMBL"],a:1,e:"FASTA diawali '>' + header (mis. >NM_000059) lalu sekuen polos. GenBank menyimpan anotasi lengkap, PDB menyimpan koordinat struktur — bukan input BLAST."},
+{t:"Tools",q:"ID unik kombinasi huruf-angka tiap entri GenBank/NCBI disebut…",o:["FASTA Code","Accession Number","Bit Score","Query ID","E-value Tag"],a:1,e:"Accession Number (mis. NM_000059) stabil antar update; angka di belakang titik = versi. Bit score & E-value itu skor hasil, bukan ID."},
+{t:"Tools",q:"Basis data untuk struktur 3D protein adalah…",o:["GenBank","UniProt","PDB","DDBJ","PubMed"],a:2,e:"PDB = Protein Data Bank, ID-nya 4 karakter (mis. 1CRN) berisi koordinat atom. UniProt = sekuen + fungsi protein, GenBank = sekuen nukleotida."},
+{t:"Mutasi",q:"Yang dimaksud mutasi genetik adalah…",o:["Perubahan urutan materi genetik yang terwariskan","Pembentukan mRNA dari DNA","Perbaikan DNA rusak UV","Pembelahan sel tak terkontrol","Penggabungan rantai asam amino"],a:0,e:"Kata kunci: inherited change pada materi genetik. Bisa spontan (kesalahan replikasi) atau induksi (UV, mutagen kimia)."},
+{t:"Mutasi",q:"Adenin → Guanin (purin ke purin) disebut…",o:["Transversi","Transisi","Frameshift","Nonsense","Silent"],a:1,e:"Transisi = sejenis: A↔G atau C↔T. Mnemonik 'si' = sejenis. Transisi terjadi lebih sering daripada transversi."},
+{t:"Mutasi",q:"Adenin → Timin (purin ke pirimidin) disebut…",o:["Transisi","Silent","Transversi","Missense","Supresor"],a:2,e:"Transversi = beda grup (purin ↔ pirimidin). Distorsi heliksnya lebih besar sehingga lebih sering merusak fungsi."},
+{t:"Mutasi",q:"Nukleotida berubah tapi asam amino tetap disebut…",o:["Nonsense","Missense","Silent","Frameshift","Letal"],a:2,e:"Silent/synonymous berkat degenerasi kodon (mis. CUU→CUC tetap Leusin). Catatan: silent di daerah splice-site tetap bisa patogen."},
+{t:"Mutasi",q:"Kodon asam amino berubah jadi kodon stop disebut…",o:["Silent","Netral","Reversi","Missense","Nonsense"],a:4,e:"Nonsense → stop prematur → polipeptida terpotong (loss-of-function) dan biasanya dihancurkan via nonsense-mediated decay."},
+{t:"Mutasi",q:"Contoh kodon stop yang muncul akibat nonsense…",o:["AUG","UAA","UUU","CUU","GGG"],a:1,e:"Stop standar: UAA, UAG, UGA. AUG = start (Metionin), UUU = Fenilalanin — jangan terkecoh."},
+{t:"Mutasi",q:"Insersi/delesi 1–2 basa menyebabkan…",o:["Transisi saja","Mutasi berhenti otomatis","Basa purin baru","Frameshift","Tak ada perubahan"],a:3,e:"Bukan kelipatan 3 → bingkai triplet geser, semua asam amino di hilir berubah. Kelipatan 3 = in-frame (tambah/kurang aa), bukan frameshift."},
+{t:"Mutasi",q:"Substitusi aa sejenis hingga fungsi tetap disebut…",o:["Netral","Nonsense","Frameshift","Letal","Frameshift"],a:0,e:"Netral: mis. leusin ↔ isoleusin yang mirip kimiawi. Bedakan dengan silent (silent di level nukleotida, netral di level protein)."},
+{t:"Mutasi",q:"Mutasi di sel reproduksi dan diwariskan disebut…",o:["Somatik","Germline","Kondisional","Teratogenesis","Induksi buatan"],a:1,e:"Germline (gamet) diwariskan ke anak — relevan untuk konseling genetik. Somatik hanya di jaringan individu, mis. mutasi sel kanker."},
+{t:"Mutasi",q:"Mutasi kedua di lokasi beda yang memulihkan fungsi disebut…",o:["Supresor","Maju (forward)","Letal","Transisi","Missense"],a:0,e:"Supresor bisa intragenik (gen yang sama) atau intergenik (mis. tRNA supresor) yang mengkompensasi mutasi pertama."},
+{t:"BLAST",q:"Kepanjangan BLAST adalah…",o:["Basic Local Alignment Search Tool","Biological Local Alignment Sequence Tool","Base Line Alignment Search Technique","Basic Linear Alignment Sequence Search","Bioinformatic Local Alignment Search Technique"],a:0,e:"Hafal: Basic Local Alignment Search Tool. Ia heuristik lokal (seed-and-extend) sehingga jauh lebih cepat dari alignment full Smith-Waterman."},
+{t:"BLAST",q:"Query nukleotida vs database nukleotida memakai…",o:["BLASTP","BLASTX","BLASTN","TBLASTN","TBLASTX"],a:2,e:"N = nucleotide. Dipakai untuk verifikasi sekuen PCR atau identifikasi spesies via gen 16S."},
+{t:"BLAST",q:"Query protein vs database protein memakai…",o:["BLASTN","BLASTP","BLASTX","TBLASTN","TBLASTX"],a:1,e:"Protein–protein = BLASTP. Lebih sensitif untuk fungsi karena asam amino lebih terkonservasi daripada nukleotida."},
+{t:"BLAST",q:"Query nukleotida ditranslasi lalu vs database protein…",o:["BLASTN","BLASTP","BLASTX","TBLASTN","TBLASTX"],a:2,e:"BLASTX: query nukleotida ditranslasi 6 frame lalu vs protein db. Berguna saat hanya punya EST/reads tanpa anotasi protein."},
+{t:"BLAST",q:"E-value menunjukkan…",o:["Total nukleotida db","Kemiripan yang terjadi secara kebetulan","Panjang query","Kecepatan search","Kadar GC"],a:1,e:"E-value = expected hits by chance. Makin besar database, E makin besar untuk skor yang sama — jadi selalu baca bersama ukuran db."},
+{t:"BLAST",q:"Untuk menyimpulkan homologi kuat, E-value harus…",o:["Sangat besar (>100)","Sangat kecil (≈0.0)","Negatif","Tepat 100%","= panjang urutan"],a:1,e:"Mendekati 0 = hampir mustahil kebetulan. Rule of thumb: E < 1e-5 kuat; E > 0.01 ragukan, wajib cek coverage & identitas."},
+{t:"BLAST",q:"Query Coverage menggambarkan…",o:["% panjang query yang ter-align","Jumlah basa mutasi","% error algoritma","Jumlah spesies","Ukuran file"],a:0,e:"Coverage tinggi + E-value kecil = hit bagus. Ideal >70% coverage dengan identitas >90% untuk klaim gen yang sama."},
+{t:"BLAST",q:"Situs resmi Web BLAST di materi praktikum…",o:["UniProt","EBI","NCBI","PDB","DDBJ"],a:2,e:"NCBI BLAST (blast.ncbi.nlm.nih.gov). EBI menyediakan layanan sejenis sebagai alternatif."},
+{t:"MolBio",q:"Urutan tahap PCR yang benar…",o:["Annealing → Denaturasi → Ekstensi","Denaturasi → Annealing → Ekstensi","Ekstensi → Denaturasi → Annealing","Denaturasi → Ekstensi → Annealing","Annealing → Ekstensi → Denaturasi"],a:1,e:"Mnemonik D-A-E: Denaturasi 95°C (buka untai) → Annealing ±55°C (primer menempel) → Ekstensi 72°C (Taq memanjang)."},
+{t:"MolBio",q:"Enzim pemanjang primer pada PCR…",o:["Ligase","Taq polimerase","Restriktase","Reverse transcriptase","Helikase"],a:1,e:"Taq dari Thermus aquaticus, tahan panas 95°C. Untuk fidelity tinggi (kloning) gunakan Pfu/Q5 yang punya proofreading."},
+{t:"MolBio",q:"Aturan desain primer yang benar…",o:["Panjang 8–10 nt, Tm beda 20°","18–22 nt, Tm 58–60°, GC 40–60%, hindari dimer","GC 90%, 3' poly-A","Satu primer cukup","Tm >90°"],a:1,e:"F/R selisih Tm ≤2°C, G/C clamp di ujung 3', dan selalu cek hairpin/self-dimer (mis. OligoAnalyzer) sebelum order."},
+{t:"MolBio",q:"Fungsi elektroforesis gel agarosa…",o:["Menggandakan DNA","Memisahkan fragmen by ukuran","Menentukan urutan basa","Menyambung plasmid","Mentranskripsi RNA"],a:1,e:"Fragmen kecil lari lebih jauh ke kutub positif. Selalu sertakan marker/ladder sebagai pembanding ukuran dan pewarna seperti SYBR."},
+{t:"MolBio",q:"Untuk verifikasi spesifisitas primer hasil desain, langkah tepat…",o:["BLAST/Primer-BLAST sekuen primer","Ukur pH buffer saja","Ulangi PCR tanpa kontrol","Lihat warna tabung","Tebak dari nama gen"],a:0,e:"Primer-BLAST NCBI mengecek off-target dan ukuran produk (ideal 70–1000 bp) sebelum primer dipesan."},
+{t:"MolBio",q:"Primer 20 nt dengan 10 G/C dan 10 A/T, estimasi Tm aturan Wallace…",o:["40°C","50°C","60°C","80°C","100°C"],a:2,e:"Tm ≈ 4×(G/C)+2×(A/T) = 40+20 = 60°C → annealing pas di 55–60°C. Wallace hanya kasar; untuk primer panjang gunakan nearest-neighbor."},
+{t:"MolBio",q:"Komponen PCR wajib KECUALI…",o:["Template DNA","Primer F/R","dNTP","Taq + buffer","Antibodi"],a:4,e:"Antibodi untuk ELISA/western, bukan PCR. Kontrol PCR yang benar: NTC (no template) dan kontrol positif."},
+{t:"MolBio",q:"Perbedaan Sanger vs NGS yang tepat…",o:["NGS high-throughput paralel, Sanger 1 fragmen/kapiler","Sanger paralel jutaan fragmen","NGS hanya protein","Keduanya tanpa deteksi fluoresens","Sanger untuk metagenom besar"],a:0,e:"Sanger = gold standard satu region (±800–1000 bp akurat); NGS = jutaan reads pendek paralel untuk genom/metagenom."},
+{t:"Esai-logic",q:"Mutasi insersi 1 basa di tengah ekson paling mungkin…",o:["Silent pasti","Frameshift + nonsense prematur hilir","Tidak efek","Hanya ubah 1 aa","Jadi mutasi germline"],a:1,e:"Bingkai geser → seluruh kodon hilir berubah dan kodon stop prematur sering muncul. Pembeda klasik: delesi 3 basa CFTR ΔF508 itu in-frame, bukan frameshift."}
+];
+let order=[],cur=0,ans={},flag={},tLeft=3600,tInt=null,done=false,started=false;
+const $=id=>document.getElementById(id);
+function fmt(s){return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")}
+function start(){order=QS.map((_,i)=>i);if($("shuffle").checked){for(let i=order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[order[i],order[j]]=[order[j],order[i]]}}cur=0;ans={};flag={};done=false;started=true;tLeft=3600;clearInterval(tInt);tInt=setInterval(()=>{if(done)return;tLeft--;$("timer").textContent=fmt(Math.max(0,tLeft));$("timer").classList.toggle("low",tLeft<300);if(tLeft<=0)finish(true)},1000);$("timer").textContent="60:00";$("timer").classList.remove("low");render();window.scrollTo({top:document.getElementById("app").offsetTop-10,behavior:"smooth"})}
+function progress(){const d=Object.keys(ans).length;const el=$("pbar");if(el)el.style.width=(d/order.length*100)+"%";return d}
+function render(){const app=$("app");if(!started){app.innerHTML="";return}if(done){review(app);return}const qi=order[cur],Q=QS[qi],d=progress();const u=ans[qi],locked=u!==undefined,ok=locked&&u===Q.a;const live=liveScore();$("info").textContent=`Soal ${cur+1}/${order.length} · terjawab ${d} · skor ${live.c}/${d}`;let h=`<div class="layout"><div class="glass"><span class="qtag">${Q.t}</span><div class="qtext">${cur+1}. ${Q.q}</div><div aria-live="polite">`;Q.o.forEach((op,i)=>{let cls="opt";if(locked){cls+=" locked";if(i===Q.a)cls+=" ok";else if(i===u)cls+=" bad"}h+=`<button class="${cls}" ${locked?"disabled":""} onclick="pick(${i})"><span class="L">${"ABCDE"[i]}</span><span>${op}</span></button>`});h+=`</div>`;if(locked){h+=`<div class="fb ${ok?"ok":"no"}" aria-live="polite">${ok?"Benar. +1":"Kurang tepat. Kunci: "+"ABCDE"[Q.a]}</div><div class="exp"><b>Pembahasan:</b> ${Q.e}</div>`}h+=`<div class="foot"><button class="btn-ghost" onclick="nav(-1)">Sebelumnya</button><button class="btn-ghost" onclick="flagQ()">${flag[qi]?"Hapus tanda":"Tandai ragu"}</button>${locked?(cur<order.length-1?`<button class="btn-primary" onclick="nav(1)">Lanjut</button>`:`<button class="btn-primary" onclick="finish(false)">Lihat Hasil</button>`):`<span class="count">Pilih satu jawaban…</span>`}</div></div><aside class="glass navbox"><h3>Navigasi · ${d}/${order.length}</h3><div class="nums">${order.map((q2,k)=>{let st="";if(ans[q2]!==undefined)st=ans[q2]===QS[q2].a?"right":"wrong";return `<button class="n ${st} ${flag[q2]?"flagged":""} ${k===cur?"cur":""}" onclick="jump(${k})" aria-label="Soal ${k+1}${st==="right"?" benar":st==="wrong"?" salah":""}">${k+1}</button>`}).join("")}</div><div class="foot"><span class="count">Skor ${live.c}/${d}</span><button class="btn-danger" onclick="finish(false)">Selesai &amp; Nilai</button></div></aside></div>`;app.innerHTML=h}
+window.pick=i=>{const qi=order[cur];if(ans[qi]!==undefined)return;ans[qi]=i;render();const fb=document.querySelector(".fb");if(fb)fb.scrollIntoView({block:"nearest",behavior:matchMedia("(prefers-reduced-motion:reduce)").matches?"auto":"smooth"})};
+function liveScore(){let c=0,d=0;order.forEach(qi=>{if(ans[qi]!==undefined){d++;if(ans[qi]===QS[qi].a)c++}});return{c,d}}
+window.nav=d=>{cur=Math.min(order.length-1,Math.max(0,cur+d));render();window.scrollTo({top:document.getElementById("app").offsetTop-10})};window.jump=k=>{cur=k;render()};window.flagQ=()=>{const qi=order[cur];flag[qi]=!flag[qi];render()};
+function score(){let c=0;order.forEach(qi=>{if(ans[qi]===QS[qi].a)c++});return c}
+window.finish=auto=>{if(!started)return;if(!done&&!auto&&!confirm("Kumpulkan sekarang?"))return;done=true;clearInterval(tInt);render();window.scrollTo(0,0)};
+function review(app){const c=score(),pct=Math.round(c/order.length*100),pass=pct>=70;const per={};order.forEach(qi=>{const t=QS[qi].t;per[t]=per[t]||{c:0,n:0};per[t].n++;if(ans[qi]===QS[qi].a)per[t].c++});const el=$("pbar");if(el)el.style.width="100%";$("info").textContent=`selesai · ${c}/${order.length}`;$("timer").textContent=fmt(Math.max(0,tLeft));let h=`<div class="glass score-hero"><span class="qtag">Hasil</span><div class="ring">${c}<small>/${order.length} · ${pct}%</small></div><span class="verdict ${pass?"v-pass":"v-fail"}">${pass?"LULUS — pertahankan":"BELUM LULUS — ulangi yang merah"}</span><div class="kpis">${Object.entries(per).map(([k,v])=>{const p=Math.round(v.c/v.n*100);return `<div class="kpi"><b>${v.c}/${v.n}</b><span>${k} · ${p}%</span><div class="pbar"><i style="width:${p}%"></i></div></div>`}).join("")}</div><div class="controls" style="justify-content:center"><button class="btn-primary" onclick="start()">Ulangi</button><button class="btn-ghost" onclick="window.print()">Print / PDF</button></div></div>`;order.forEach((qi,k)=>{const Q=QS[qi],u=ans[qi],ok=u===Q.a;h+=`<div class="glass"><span class="qtag">${Q.t} · No ${k+1} ${ok?"· Benar":"· Salah"}</span><div class="qtext">${Q.q}</div>`+Q.o.map((op,i)=>`<div class="opt ${i===Q.a?"ok":""} ${i===u&&!ok?"bad":""}"><span class="L">${"ABCDE"[i]}</span><span>${op}${i===Q.a?" · kunci":""}${i===u?" · jawabanmu":""}</span></div>`).join("")+`<div class="exp"><b>Pembahasan:</b> ${Q.e}</div></div>`});app.innerHTML=h}
+$("bStart").onclick=start;
+$("nq2").textContent=QS.length;$("info").textContent=QS.length+" soal · siap";
+render();
+</script>
+</body>
+</html>
